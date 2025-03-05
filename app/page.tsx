@@ -1,101 +1,95 @@
-import Image from "next/image";
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ArrowRight } from "lucide-react"
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
+      <div className="relative w-full bg-gradient-to-b from-indigo-950 via-indigo-900 to-purple-900 px-4 py-32 text-white">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6">Isekai Tavern</h1>
+          <p className="text-xl md:text-2xl mb-8 max-w-2xl">
+            A medieval fantasy meeting space where adventurers from different worlds gather to connect, collaborate, and
+            share tales of their journeys.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/tavern">
+              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
+                Enter the Tavern <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+            <Link href="/about">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                Learn More
+              </Button>
+            </Link>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+        {/* Decorative stars */}
+        <div className="absolute top-12 right-12 w-2 h-2 bg-white rounded-full opacity-70"></div>
+        <div className="absolute top-36 left-24 w-1 h-1 bg-white rounded-full opacity-50"></div>
+        <div className="absolute bottom-24 right-36 w-1 h-1 bg-white rounded-full opacity-60"></div>
+        <div className="absolute top-48 right-48 w-3 h-3 bg-white rounded-full opacity-20"></div>
+        <div className="absolute bottom-48 left-48 w-2 h-2 bg-white rounded-full opacity-30"></div>
+      </div>
+
+      {/* Features Section */}
+      <div className="py-20 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900">A Magical Meeting Place</h2>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-purple-50 p-6 rounded-xl">
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">Customizable Avatars</h3>
+              <p className="text-gray-600">
+                Create your medieval fantasy character with unique outfits and accessories to represent yourself in the
+                tavern.
+              </p>
+            </div>
+
+            <div className="bg-purple-50 p-6 rounded-xl">
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">Interactive Spaces</h3>
+              <p className="text-gray-600">
+                Move freely around the tavern, join different tables, and interact with objects in the environment.
+              </p>
+            </div>
+
+            <div className="bg-purple-50 p-6 rounded-xl">
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">Real-time Communication</h3>
+              <p className="text-gray-600">
+                Chat with nearby adventurers, share stories, and collaborate on quests and projects.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Call to Action */}
+      <div className="bg-gradient-to-r from-purple-800 to-indigo-800 py-16 px-4 text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Join the Adventure?</h2>
+          <p className="text-xl mb-8">Create your character and step into our medieval fantasy tavern.</p>
+          <Link href="/tavern">
+            <Button size="lg" className="bg-white text-purple-800 hover:bg-gray-100">
+              Enter the Tavern
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center">
+            <h3 className="text-white text-lg font-semibold mb-4">Isekai Tavern</h3>
+            <p>A medieval fantasy meeting space for adventurers from all worlds.</p>
+            <p className="mt-8">&copy; {new Date().getFullYear()} Isekai Tavern. All rights reserved.</p>
+          </div>
+        </div>
       </footer>
     </div>
-  );
+  )
 }
+
