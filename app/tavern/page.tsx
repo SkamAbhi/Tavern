@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card"
 import { MessageCircle, Users, X, Mic, MicOff, Settings } from "lucide-react"
 import ChatPanel from "../components/chat-panel"
 import ParticipantsList from "../components/participants-list"
-import TavernMap from "../components/tavern-map"
+import Tavern from "../components/tavern-map"
 
 export default function TavernPage() {
   const [showChat, setShowChat] = useState(false)
@@ -17,7 +17,7 @@ export default function TavernPage() {
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-purple-50 relative">
       {/* Main tavern area */}
       <div className="p-4">
-        <TavernMap />
+        <Tavern/>
       </div>
 
       {/* Controls */}
@@ -74,13 +74,7 @@ export default function TavernPage() {
         </div>
       )}
 
-      {/* Room info */}
-      <div className="fixed top-20 left-4">
-        <Card className="p-3 shadow-md">
-          <h3 className="font-medium text-lg">The Golden Dragon Tavern</h3>
-          <p className="text-sm text-gray-500">Main Hall • 12 adventurers present</p>
-        </Card>
-      </div>
+     
     </div>
   )
 }
