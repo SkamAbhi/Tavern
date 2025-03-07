@@ -1,0 +1,1 @@
+router.post('/:id/join', checkMeetingAccess, joinMeeting);
