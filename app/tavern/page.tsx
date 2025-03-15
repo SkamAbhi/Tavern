@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card"
 import { MessageCircle, Users, X, Mic, MicOff, Settings } from "lucide-react"
 import ChatPanel from "../components/chat-panel"
 import ParticipantsList from "../components/participants-list"
-import Tavern from "../components/tavern-map"
+import Tavern from "../components/OutdoorMeeting"
 
 export default function TavernPage() {
   const [showChat, setShowChat] = useState(false)

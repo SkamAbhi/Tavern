@@ -4,9 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "../contexts/AuthContexts";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -29,7 +32,7 @@ export default function Header() {
                 href="/about"
                 className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
               >
-                About Us{" "}
+                About Us
               </Link>
               <Link
                 href="/contact"
@@ -40,12 +43,26 @@ export default function Header() {
             </nav>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
-            <Link href="/login">
-              <Button variant="outline">Login</Button>
-            </Link>
-            <Link href="/join">
-              <Button>Join</Button>
-            </Link>
+            {user ? (
+              <>
+                <Avatar>
+                  <AvatarImage src="/avatars/user.png" />
+                  <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <Button variant="outline" onClick={logout}>
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="outline">Login</Button>
+                </Link>
+                <Link href="/login">
+                  <Button>Join</Button>
+                </Link>
+              </>
+            )}
           </div>
           <div className="flex items-center sm:hidden">
             <button
@@ -89,18 +106,35 @@ export default function Header() {
           </div>
           <div className="pt-4 pb-3 border-t border-gray-200">
             <div className="flex items-center px-4 space-x-3">
-              <Link
-                href="/login"
-                className="block text-base font-medium text-gray-500 hover:text-gray-800"
-              >
-                Login
-              </Link>
-              <Link
-                href="/join"
-                className="block text-base font-medium text-purple-600 hover:text-purple-800"
-              >
-                Join
-              </Link>
+              {user ? (
+                <>
+                  <Avatar>
+                    <AvatarImage src="/avatars/user.png" />
+                    <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <button
+                    onClick={logout}
+                    className="block text-base font-medium text-gray-500 hover:text-gray-800"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="block text-base font-medium text-gray-500 hover:text-gray-800"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/join"
+                    className="block text-base font-medium text-purple-600 hover:text-purple-800"
+                  >
+                    Join
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

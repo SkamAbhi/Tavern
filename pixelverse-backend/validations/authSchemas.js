@@ -1,3 +1,4 @@
+// validations/authSchemas.js
 import { z } from 'zod';
 
 export const signupSchema = z.object({
@@ -8,5 +9,12 @@ export const signupSchema = z.object({
 
 export const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(1),
+});
+
+export const updateProfileSchema = z.object({
+  username: z.string().min(3).max(30).optional(),
+  email: z.string().email().optional(),
+}).refine(data => data.username || data.email, {
+  message: "At least one field must be provided",
 });

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Send } from "lucide-react"
 
-// Mock chat data
 const initialMessages = [
   { id: 1, sender: "System", content: "Welcome to the Golden Dragon Tavern!", timestamp: new Date().toISOString() },
   {

@@ -1,36 +1,85 @@
-"use client"
+"use client";
 
-import type React from "react"
+import React, { useState, useEffect, FormEvent, ChangeEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "../contexts/AuthContexts";
+import { toast } from "sonner";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+interface LoginFormData {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+}
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({
-    username: "",
+  const { login } = useAuth();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: "",
     password: "",
     rememberMe: false,
-  })
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleCheckboxChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, rememberMe: checked }))
-  }
+    setFormData((prev) => ({ ...prev, rememberMe: checked }));
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Login form submitted:", formData)
-    // Here you would typically authenticate with your backend
-  }
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      await login(formData.email, formData.password);
+      
+      // Save remember me preference
+      if (formData.rememberMe) {
+        localStorage.setItem('rememberEmail', formData.email);
+      } else {
+        localStorage.removeItem('rememberEmail');
+      }
+      
+      toast.success("Login successful", {
+        description: "Welcome back to your adventure!",
+      });
+
+      // Redirect to home page or dashboard
+      router.push('/');
+    } catch (error) {
+      toast.error("Login failed",{
+        
+        description: String(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load remembered email if exists
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const rememberedEmail = localStorage.getItem('rememberEmail');
+      if (rememberedEmail) {
+        setFormData(prev => ({
+          ...prev,
+          email: rememberedEmail,
+          rememberMe: true
+        }));
+      }
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-purple-50 flex items-center justify-center py-12 px-4">
@@ -42,13 +91,15 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="username"
-                name="username"
-                placeholder="Enter your username"
-                value={formData.username}
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Enter your email"
+                value={formData.email}
                 onChange={handleChange}
+                disabled={isLoading}
                 required
               />
             </div>
@@ -66,19 +117,25 @@ export default function LoginPage() {
                 placeholder="Enter your password"
                 value={formData.password}
                 onChange={handleChange}
+                disabled={isLoading}
                 required
               />
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox id="rememberMe" checked={formData.rememberMe} onCheckedChange={handleCheckboxChange} />
+              <Checkbox 
+                id="rememberMe" 
+                checked={formData.rememberMe} 
+                onCheckedChange={handleCheckboxChange}
+                disabled={isLoading}
+              />
               <Label htmlFor="rememberMe" className="text-sm">
                 Remember me
               </Label>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign In"}
             </Button>
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}
@@ -90,6 +147,5 @@ export default function LoginPage() {
         </form>
       </Card>
     </div>
-  )
+  );
 }
-

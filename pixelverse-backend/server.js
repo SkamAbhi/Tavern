@@ -1,79 +1,149 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import { Server } from 'socket.io';
-import { createServer } from 'http';
-import config from './config/config.js';
-import { globalErrorHandler } from './utils/errorHandler.js';
+// server.js
+import express from "express";
+import http from "http";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+import helmet from "helmet";
+import morgan from "morgan";
 
+// Import middleware
+import { apiLimiter } from "./middleware/rateLimit.js";
+
+// Import routes
+import authRoutes from "./routes/authRoutes.js";
+import { router as meetingRoutes } from "./routes/meetingRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
+import tavernRoutes from "./routes/tavernRoutes.js";
+
+// Import socket setup
+import setupSocketIO from "./socket/socket.js";
+
+// Import Swagger setup
+// import setupSwagger from './swagger/swagger.js';
+
+// Load environment variables
+dotenv.config();
+
+// Initialize Express app
 const app = express();
-const httpServer = createServer(app);
+const server = http.createServer(app);
 
-// Middleware pipeline
-app.use(express.json({ limit: '10kb' }));
+// Setup socket.io
+const io = setupSocketIO(server);
+
+// Middleware
+app.use(cors());
+app.use(express.json());
 app.use(helmet()); // Security headers
-app.use(cors({ origin: config.CLIENT_URL }));
+app.use(morgan("dev")); // Logging
 
-// Rate limiting (100 requests/15min per IP)
-app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    message: 'Too many requests from this IP',
-  })
-);
+// Apply rate limiting to all routes
+// app.use('/api', apiLimiter);
 
-// Connect to MongoDB
-await mongoose.connect(config.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  maxPoolSize: 10, // Connection pool size
+// Share io instance across routes
+app.use((req, res, next) => {
+  req.io = io;
+  next();
 });
 
-// Socket.IO setup
-const io = new Server(httpServer, {
-  cors: { origin: config.CLIENT_URL },
-  connectionStateRecovery: {}, // Auto-reconnect for real-time features
+app.get("/", (req, res) => {
+  res.send("Server is running...");
 });
 
 // API Routes
-import authRouter from './routes/authRoutes.js';
-app.use('/api/v1/auth', authRouter);
+app.use("/api/auth", authRoutes);
+app.use("/api/meetings", meetingRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/tavern", tavernRoutes);
 
-// Error handling
-app.use(globalErrorHandler);
+// API Documentation
+// setupSwagger(app);
 
-// Start server
-httpServer.listen(config.PORT, () => {
-  console.log(`Server running on port ${config.PORT}`);
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || "Server Error",
+  });
+});
 
+// Connect to MongoDB
+mongoose
+  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/tavern")
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
+
+app._router.stack.forEach((r) => {
+  if (r.route && r.route.path) {
+    console.log(`Registered Route: ${r.route.path}`);
+  }
+});
+// Store connected players
+const players = new Map();
 io.on('connection', (socket) => {
-  // Join tavern on login
-  socket.on('joinTavern', async (userId) => {
-    const user = await User.findById(userId);
-    socket.join('tavern');
-    
-    // Broadcast to tavern
-    io.to('tavern').emit('userEntered', user);
-  });
+  console.log('New connection - Socket ID:', socket.id);
 
-  // Private meeting creation
-  socket.on('createMeeting', async (userId) => {
-    const meetingId = crypto.randomBytes(8).toString('hex');
-    await User.findByIdAndUpdate(userId, { 
-      currentRoom: 'meeting', 
-      meetingId 
+  socket.on('playerLogin', (userData) => {
+    const { userId, username, x, y } = userData;
+    players.set(socket.id, { 
+      id: userId, 
+      username, 
+      x: x !== undefined ? x : 1000, 
+      y: y !== undefined ? y : 1200 
     });
-    
-    socket.leave('tavern');
-    socket.join(meetingId);
-    socket.emit('meetingCreated', meetingId);
+
+    console.log('Player login received:', { userId, username, x, y }, 'Socket ID:', socket.id);
+
+    // Send all existing players to the new client
+    socket.emit('loadPlayers', Array.from(players.entries()).map(([socketId, data]) => ({
+      socketId,
+      id: data.id,
+      username: data.username,
+      x: data.x,
+      y: data.y
+    })));
+
+    // Broadcast new player to all other clients
+    socket.broadcast.emit('playerJoined', {
+      socketId: socket.id,
+      id: userId,
+      username,
+      x: players.get(socket.id).x,
+      y: players.get(socket.id).y
+    });
+
+    console.log('Players:', Array.from(players.keys()));
   });
 
-  // Avatar movement (tavern only)
-  socket.on('move', async ({ userId, x, y }) => {
-    await User.findByIdAndUpdate(userId, { position: { x, y } });
-    socket.to('tavern').emit('playerMoved', { userId, x, y });
+  socket.on('playerMove', (position) => {
+    const player = players.get(socket.id);
+    if (player) {
+      player.x = position.x;
+      player.y = position.y;
+      socket.broadcast.emit('playerMoved', { socketId: socket.id, position });
+      console.log(`Player ${socket.id} moved to:`, position);
+    }
   });
+
+  socket.on('disconnect', () => {
+    console.log('Player disconnected:', socket.id);
+    players.delete(socket.id);
+    io.emit('playerLeft', socket.id);
+  });
+});
+
+// Start server
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(
+    `API documentation available at http://localhost:${PORT}/api-docs`
+  );
 });
